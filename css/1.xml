@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="classrsoomgoogle" />
+<Content type="html"><![CDATA[
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>google.com</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#05070b;
+ -webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}
+*{overflow:hidden}
+#stage{position:fixed;inset:0;background:#05070b;display:flex;align-items:center;justify-content:center}
+#unity-canvas{display:block;background:#05070b;outline:none;max-width:100%;max-height:100%}
+
+#boot{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+ opacity:1;transition:opacity .6s ease}
+#boot.fade{opacity:0;pointer-events:none}
+#boot.gone{display:none}
+#bg{position:absolute;inset:0;background:radial-gradient(85% 60% at 50% 40%, #16202e 0%, #0b1119 48%, #05070b 100%)}
+#win{position:absolute;left:50%;top:48%;width:min(440px,78vw);height:min(300px,46vh);transform:translate(-50%,-50%);
+ pointer-events:none;opacity:.5;
+ background:linear-gradient(180deg, rgba(150,185,225,.16), rgba(80,110,150,.05) 60%, transparent);
+ box-shadow:0 0 90px 30px rgba(110,150,200,.10);
+ animation:glow 7s ease-in-out infinite}
+#win:before,#win:after{content:"";position:absolute;background:rgba(10,14,20,.75)}
+#win:before{left:50%;top:0;bottom:0;width:3px;transform:translateX(-50%)}
+#win:after{top:50%;left:0;right:0;height:3px;transform:translateY(-50%)}
+@keyframes glow{0%,100%{opacity:.42}50%{opacity:.62}}
+#rain{position:absolute;inset:-20%;pointer-events:none;opacity:.16;
+ background:repeating-linear-gradient(104deg,rgba(185,215,255,.55) 0 1px,transparent 1px 7px);
+ animation:fall 1.5s linear infinite}
+@keyframes fall{to{transform:translate3d(-60px,180px,0)}}
+#veil{position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(66% 52% at 50% 45%, rgba(0,0,0,0) 26%, rgba(2,4,7,.80) 76%, rgba(1,2,4,.97) 100%);
+ animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.93}50%{opacity:1}}
+#grain{position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
+ background-image:radial-gradient(rgba(255,255,255,.5) .5px,transparent .6px);background-size:3px 3px;
+ animation:jit .8s steps(2) infinite}
+@keyframes jit{0%{transform:translate(0,0)}50%{transform:translate(1px,-1px)}100%{transform:translate(-1px,1px)}}
+
+#in{position:relative;display:flex;flex-direction:column;align-items:center;gap:15px;padding:0 22px;text-align:center;max-width:620px}
+#ttl{margin:0;font:700 clamp(18px,3.2vw,29px)/1.2 Georgia,"Times New Roman",serif;letter-spacing:.3em;
+ text-transform:uppercase;color:#dde8f5;
+ text-shadow:0 2px 0 rgba(0,0,0,.9),0 0 24px rgba(120,170,230,.45),0 0 60px rgba(60,100,160,.4);
+ animation:flick 6s linear infinite}
+@keyframes flick{0%,95%,100%{opacity:1}96%{opacity:.4}96.7%{opacity:.95}97.6%{opacity:.3}98.4%{opacity:.92}}
+#sub{margin:0;font:400 clamp(9px,1.4vw,11px)/1.7 Georgia,serif;letter-spacing:.3em;text-transform:uppercase;color:#7e94ad}
+#rule{width:76px;height:1px;background:linear-gradient(90deg,transparent,#5f87b5,transparent);opacity:.9}
+#bar{position:relative;width:min(390px,76vw);height:7px;border-radius:2px;background:rgba(255,255,255,.07);
+ box-shadow:inset 0 0 0 1px rgba(120,170,220,.26),inset 0 2px 6px rgba(0,0,0,.7)}
+#fill{position:relative;overflow:hidden;width:0%;height:100%;border-radius:inherit;
+ transition:width .4s cubic-bezier(.25,.8,.3,1);
+ background:linear-gradient(90deg,#1d3c5e,#3f79b4 58%,#9fc8ee);box-shadow:0 0 14px rgba(90,150,215,.6)}
+#fill:after{content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(90deg,transparent,rgba(235,245,255,.42),transparent);
+ background-size:38% 100%;background-repeat:no-repeat;animation:sweep 2.3s linear infinite}
+@keyframes sweep{from{background-position:-45% 0}to{background-position:145% 0}}
+#pct{font:600 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.3em;color:#bed6ee}
+#msg{min-height:16px;font:400 italic clamp(11px,1.6vw,13px)/1.5 Georgia,serif;color:#8198b0;
+ transition:opacity .5s ease;opacity:1}
+#msg.out{opacity:0}
+#rl{display:none;margin-top:4px;border:0;border-radius:3px;padding:11px 28px;cursor:pointer;
+ font:700 11px/1 Georgia,serif;letter-spacing:.2em;text-transform:uppercase;
+ background:linear-gradient(180deg,#3f79b4,#20486e);color:#eaf3ff}
+#boot.err #rl{display:block}
+#boot.err #msg{color:#f0a89a;font-style:normal}
+#boot.err #fill{background:linear-gradient(90deg,#4a1a12,#8a3524)}
+#boot.err #fill:after{display:none}
+#boot.err #ttl{animation:none}
+@media (prefers-reduced-motion:reduce){#win,#rain,#veil,#grain,#ttl,#fill:after{animation:none}#fill{transition:none}}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+<div id="boot">
+  <div id="bg"></div><div id="win"></div><div id="rain"></div><div id="grain"></div><div id="veil"></div>
+  <div id="in">
+    <h1 id="ttl">Classroom Resources</h1>
+    <div id="rule"></div>
+    <p id="sub">Night is falling</p>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="pct">0%</div>
+    <div id="msg">Closing the curtains...</div>
+    <button id="rl">Try again</button>
+  </div>
+</div>
+
+<script>
+window.M = {
+  "loader": "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.loader.js",
+  "framework": "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.framework.js",
+  "streaming": "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/StreamingAssets"
+};
+window.M_WASM = [
+  "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.wasm.part1",
+  "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.wasm.part2"
+];
+window.M_DATA = [
+  "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.data.part1",
+  "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.data.part2",
+  "https://cdn.jsdelivr.net/gh/styles-css-files/00v00v00v500v00v00@7d3b1a6bcbf71af06501de4fed54e8bf1a7404be/css/Build/build.data.part3"
+];
+window.M_TOTAL = 85721216;
+</script>
+
+<script>
+(function () {
+  var ready = false, on = false, cv = null, drag = false, pid = null, tipped = false;
+
+  function pick(el) {
+    if (el && el.tagName === 'CANVAS') return el;
+    return document.getElementById('unity-canvas') || document.querySelector('canvas');
+  }
+
+  function relay(e) {
+    var o = {
+      bubbles: true, cancelable: true, view: window, detail: 0,
+      clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY,
+      button: 0, buttons: e.buttons, movementX: e.movementX || 0, movementY: e.movementY || 0
+    };
+    var m;
+    try { m = new MouseEvent('mousemove', o); } catch (err) { return; }
+    try { if (m.movementX !== o.movementX) Object.defineProperty(m, 'movementX', { value: o.movementX, configurable: true }); } catch (x) {}
+    try { if (m.movementY !== o.movementY) Object.defineProperty(m, 'movementY', { value: o.movementY, configurable: true }); } catch (x) {}
+    try { if (m.buttons !== o.buttons) Object.defineProperty(m, 'buttons', { value: o.buttons, configurable: true }); } catch (x) {}
+    m.__syn = 1;
+    cv.dispatchEvent(m);
+  }
+
+  function eat(e) {
+    if (!on || !drag || e.__syn) return;
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+  }
+
+  function down(e) {
+    if (!on || drag || e.pointerType === 'touch' || e.buttons === 0) return;
+    drag = true; pid = e.pointerId;
+    try { cv.setPointerCapture(pid); } catch (x) {}
+  }
+
+  function move(e) {
+    if (!on || !drag || e.pointerId !== pid) return;
+    if (e.movementX || e.movementY) relay(e);
+  }
+
+  function up(e) {
+    if (!drag || (e && e.pointerId !== pid)) return;
+    if (e && e.buttons) return;
+    try { cv.releasePointerCapture(pid); } catch (x) {}
+    drag = false; pid = null;
+  }
+
+  function tip() {
+    if (tipped) return; tipped = true;
+    var n = document.createElement('div');
+    n.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:100001;max-width:min(520px,92vw);' +
+      'padding:9px 16px;border-radius:6px;background:rgba(6,10,16,.92);border:1px solid rgba(120,170,220,.5);' +
+      'color:#cfe0f2;font:600 11.5px/1.6 Georgia,serif;text-align:center;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.65)';
+    n.innerHTML = 'To look around, <b style="color:#8ec2f5">hold a mouse button and move</b>. Clicking works as usual.';
+    n.onclick = function () { if (n.parentNode) n.parentNode.removeChild(n); };
+    document.body.appendChild(n);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 13000);
+  }
+
+  function setup(el) {
+    if (ready) return true;
+    cv = pick(el);
+    if (!cv) return false;
+    ready = true;
+    window.addEventListener('mousemove', eat, true);
+    cv.addEventListener('pointerdown', down, true);
+    window.addEventListener('pointermove', move, true);
+    window.addEventListener('pointerup', up, true);
+    window.addEventListener('pointercancel', up, true);
+    window.addEventListener('blur', function () { up(null); });
+    return true;
+  }
+
+  function arm(el, tries) {
+    if (!setup(el)) {
+      if ((tries || 0) < 25) setTimeout(function () { arm(el, (tries || 0) + 1); }, 400);
+      return;
+    }
+    if (on) return;
+    on = true;
+    tip();
+  }
+
+  function disarm() {
+    if (!on) return;
+    on = false;
+    up(null);
+  }
+
+  var rq = Element.prototype.requestPointerLock;
+  if (rq) Element.prototype.requestPointerLock = function () {
+    var el = this, r;
+    try { r = rq.apply(el, arguments); }
+    catch (e) { arm(el, 0); return; }
+    if (r && typeof r.catch === 'function') r.catch(function () { arm(el, 0); });
+    else setTimeout(function () { if (document.pointerLockElement !== el) arm(el, 0); }, 500);
+    return r;
+  };
+
+  document.addEventListener('pointerlockchange', function () { if (document.pointerLockElement) disarm(); });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    var m = '';
+    try { m = String((e.reason && (e.reason.message || e.reason)) || ''); } catch (x) {}
+    if (m.indexOf('requestPointerLock') >= 0 || m.indexOf('ointer lock') >= 0) arm(null, 0);
+  });
+
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) {
+    var pool = [];
+    function Wrapped() {
+      var c = new AC(arguments[0]);
+      pool.push(c);
+      return c;
+    }
+    Wrapped.prototype = AC.prototype;
+    try {
+      window.AudioContext = Wrapped;
+      if (window.webkitAudioContext) window.webkitAudioContext = Wrapped;
+    } catch (e) {}
+    function wake() {
+      for (var i = 0; i < pool.length; i++) {
+        try { if (pool[i].state === 'suspended') pool[i].resume(); } catch (e) {}
+      }
+    }
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+      window.addEventListener(t, wake, true);
+    });
+  }
+})();
+</script>
+
+<script>
+(function () {
+  var boot = document.getElementById('boot'), fill = document.getElementById('fill');
+  var pctEl = document.getElementById('pct'), msgEl = document.getElementById('msg');
+  var subEl = document.getElementById('sub'), rlEl = document.getElementById('rl');
+  var canvas = document.getElementById('unity-canvas');
+  var start = Date.now(), shown = 0, dead = false;
+
+  window.open = function () { return null; };
+  rlEl.onclick = function () { try { location.reload(); } catch (e) {} };
+
+  function setPct(p) {
+    p = Math.max(0, Math.min(100, Math.round(p)));
+    if (p <= shown) return;
+    shown = p;
+    fill.style.width = p + '%';
+    pctEl.textContent = p + '%';
+  }
+
+  var LINES = [
+    'Closing the curtains...',
+    'Checking the locks...',
+    'Dimming the hallway...',
+    'Listening to the rain...',
+    'Something tapped the glass...',
+    'Keeping very still...',
+    'Counting to ten...',
+    'Do not open the window...',
+    'Holding the flashlight...',
+    'Almost ready. Stay quiet.'
+  ];
+  var li = 0, swap = setInterval(function () {
+    if (dead) return;
+    li = (li + 1) % LINES.length;
+    msgEl.classList.add('out');
+    setTimeout(function () {
+      if (dead) return;
+      msgEl.textContent = LINES[li];
+      msgEl.classList.remove('out');
+    }, 500);
+  }, 4200);
+
+  function fail(text) {
+    if (dead) return;
+    dead = true;
+    clearInterval(swap);
+    boot.classList.add('err');
+    boot.classList.remove('fade', 'gone');
+    subEl.textContent = 'The door will not open';
+    msgEl.textContent = text;
+  }
+
+  function hideBoot() {
+    clearInterval(swap);
+    var wait = Math.max(0, 800 - (Date.now() - start));
+    setTimeout(function () {
+      boot.classList.add('fade');
+      setTimeout(function () { boot.classList.add('gone'); }, 650);
+    }, wait);
+  }
+
+  var ALL = window.M_WASM.concat(window.M_DATA);
+  var EST = window.M_TOTAL, seen = 0, bins = new Array(ALL.length);
+  function bytes(n) {
+    seen += n;
+    setPct(Math.min(90, seen / EST * 90));
+  }
+
+  function one(idx, tries) {
+    return fetch(ALL[idx]).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      if (!r.body || !r.body.getReader) return r.blob();
+      var reader = r.body.getReader(), chunks = [];
+      return (function pump() {
+        return reader.read().then(function (res) {
+          if (res.done) return new Blob(chunks);
+          chunks.push(res.value);
+          bytes(res.value.length);
+          return pump();
+        });
+      })();
+    }).then(function (b) { bins[idx] = b; }, function (e) {
+      tries = (tries || 0) + 1;
+      if (tries >= 4) throw e;
+      return new Promise(function (ok) { setTimeout(ok, 700 * tries); }).then(function () { return one(idx, tries); });
+    });
+  }
+
+  function pool(limit) {
+    var next = 0;
+    function worker() {
+      if (next >= ALL.length) return Promise.resolve();
+      var i = next++;
+      return one(i, 0).then(worker);
+    }
+    var runs = [];
+    for (var k = 0; k < limit; k++) runs.push(worker());
+    return Promise.all(runs);
+  }
+
+  function loadScript(src) {
+    return new Promise(function (ok, no) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function () { ok(); };
+      s.onerror = function () { no(new Error('loader')); };
+      document.body.appendChild(s);
+    });
+  }
+
+  var scriptReady = loadScript(window.M.loader);
+  var nWasm = window.M_WASM.length;
+
+  pool(3).then(function () {
+    setPct(92);
+    var wasmUrl = URL.createObjectURL(new Blob(bins.slice(0, nWasm), { type: 'application/wasm' }));
+    var dataUrl = URL.createObjectURL(new Blob(bins.slice(nWasm), { type: 'application/octet-stream' }));
+    for (var k = 0; k < bins.length; k++) bins[k] = null;
+    return scriptReady.then(function () { return { w: wasmUrl, d: dataUrl }; });
+  }).then(function (u) {
+    if (typeof createUnityInstance !== 'function') throw new Error('loader');
+    var cap = (navigator.deviceMemory && navigator.deviceMemory <= 4) ? 1 : 2;
+    return createUnityInstance(canvas, {
+      dataUrl: u.d,
+      frameworkUrl: window.M.framework,
+      codeUrl: u.w,
+      streamingAssetsUrl: window.M.streaming,
+      companyName: 'Zed_Technician',
+      productName: 'TheManFromTheWindow',
+      productVersion: '0.9921',
+      matchWebGLToCanvasSize: true,
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, cap),
+      showBanner: function () {}
+    }, function (p) {
+      setPct(92 + (p || 0) * 8);
+    });
+  }).then(function (inst) {
+    window.unityInstance = inst;
+    setPct(100);
+    hideBoot();
+  }).catch(function (e) {
+    var m = String((e && (e.message || e)) || '');
+    if (m === 'loader') fail('The game engine could not be reached. Check the connection and try again.');
+    else fail('The game files could not be loaded. Check the connection and try again.');
+  });
+
+  setTimeout(function () { if (shown < 1) setPct(1); }, 600);
+})();
+</script>
+<!-- Sticky Bottom Center Ad (728x90) with Smooth Slide-Out and Reappearance -->
+<style>
+  /* Container: Bottom center, fixed, with overflow hidden */
+  #ad-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(728px, calc(100% - 20px)); /* 728px, 10px margin on mobile */
+    height: 90px;
+    background: rgba(0, 0, 0, 0.90);
+    display: none;
+    z-index: 99999;
+    border-radius: 0; /* Sharp corners */
+    overflow: hidden;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+    transition: transform 0.5s ease-in-out; /* Smooth slide-in/out animation */
+  }
+
+  /* Slide-out animation */
+  #ad-container.hidden {
+    transform: translate(-50%, 100%); /* Slide down out of view */
+  }
+
+  #ad-iframe {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 745px; /* Updated width */
+    height: 90px; /* Updated height */
+    border: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: auto;
+    box-sizing: content-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  #ad-iframe::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Close button with arrow */
+  #close-ad {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 5px 9px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: not-allowed;
+    opacity: 0.72;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+  }
+  #close-ad.enabled {
+    cursor: pointer;
+    opacity: 1;
+  }
+  #close-ad::before {
+    content: '↓'; /* Down arrow for bottom ad */
+    margin-right: 4px;
+  }
+
+  /* Right mask for scrollbar */
+  #ad-right-mask {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9));
+    z-index: 99999;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 440px) {
+    #ad-container {
+      width: calc(100% - 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0; /* Sharp corners on mobile */
+    }
+    #ad-iframe {
+      width: 728px;
+    }
+  }
+</style>
+
+<div id="ad-container" aria-hidden="true" role="dialog" aria-label="Advertisement">
+  <iframe
+    id="ad-iframe"
+    src="https://script.google.com/macros/s/AKfycbzNG4z_PlG6Ke_bX5wSPKK2uBRB3IY9ouVzqM1shucYhSTvsJWRmyMyZaaC2z5S3ADN/exec"
+    width="768px"
+    height="95px"
+    scrolling="no"
+    frameborder="0"
+    sandbox="allow-scripts allow-popups allow-same-origin"
+  ></iframe>
+  <button id="close-ad" disabled>Close (12)</button>
+  <div id="ad-right-mask"></div>
+</div>
+
+<script>
+  (function () {
+    const showDelay = 2000; // 2 seconds delay before first show
+    const countdownStart = 12; // 12 seconds countdown
+    const reappearDelay = 150000; // 25 seconds before reappearance
+    const adContainer = document.getElementById('ad-container');
+    const closeBtn = document.getElementById('close-ad');
+
+    function showAd() {
+      // Show ad with smooth slide-in
+      adContainer.style.display = 'block';
+      adContainer.classList.remove('hidden');
+      adContainer.setAttribute('aria-hidden', 'false');
+
+      // Start countdown
+      let timeLeft = countdownStart;
+      closeBtn.textContent = `Close (${timeLeft})`;
+      closeBtn.disabled = true;
+      closeBtn.classList.remove('enabled');
+
+      const t = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          closeBtn.textContent = `Close (${timeLeft})`;
+        } else {
+          clearInterval(t);
+          closeBtn.disabled = false;
+          closeBtn.classList.add('enabled');
+          closeBtn.textContent = 'Close ↓';
+        }
+      }, 1000);
+    }
+
+    // Initial ad show
+    setTimeout(showAd, showDelay);
+
+    // Close with animation and schedule reappearance
+    closeBtn.addEventListener('click', () => {
+      if (closeBtn.disabled) return;
+      adContainer.classList.add('hidden');
+      adContainer.setAttribute('aria-hidden', 'true');
+      // Schedule reappearance without removing or reloading iframe
+      setTimeout(showAd, reappearDelay);
+    });
+  })();
+</script>
+</body>
+</html>
+
+]]></Content>
+</Module>
